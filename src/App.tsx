@@ -1,14 +1,10 @@
 import React, { useState } from "react";
-import { View } from "vega-typings";
-import { exportScene } from "./helpers/scenegraph";
-import { vega2dot } from "./helpers/vega2dot";
+import { vega2dot, vega2dataDot, vega2operations } from "./helpers/vega2dot";
 import { VegaWrapper } from "./components/VegaWrapper";
-import { SceneGraphInsepector } from "./components/SceneGraphInspector";
 import styled from "styled-components";
 import EditorPanel from "./components/EditorPanel";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import defaultSpec from "./examples/bar-chart.json";
-import FloatingButton from "./components/FloatingButton";
 import brandImage from "./images/favicon.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -47,29 +43,25 @@ const AppLayout = styled.div`
 
 const App: React.FC = () => {
   const [showTutorial, setShowTutorial] = useState(false);
-  const [view, setView] = useState<View | null>(null);
-  const [sceneGraph, setSceneGraph] = useState<object | null>(null);
+  const [operations, setOperations] = useState<
+    | {
+        data: string;
+        properties: string[];
+        operations: { type: string; params: string }[];
+      }[]
+    | null
+  >(null);
   const [dataFlow, setDataFlow] = useState<string | null>(null);
   const [spec, setSpec] = useState(JSON.stringify(defaultSpec, undefined, 2));
-  const [specDirty, setDirty] = useState(true);
   // Reference: https://sung.codes/blog/2018/09/29/resetting-error-boundary-error-state/
   const [errorBoundaryKey, setErrorBoundaryKey] = useState(0);
-
-  const updateDisplay = (): void => {
-    if (view !== null) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const internalSceneGraph = (view as any)["_scenegraph"];
-      setDataFlow(vega2dot(spec));
-      setSceneGraph(exportScene(internalSceneGraph.root));
-    }
-  };
 
   return (
     <>
       <AppLayout>
         <AppHeader>
-          <img className="mr-2 h-6 w-6" src={brandImage} alt="Vega Inspector" />
-          <span className="text-xl font-bold">Vega Inspector</span>
+          <img className="mr-2 h-6 w-6" src={brandImage} alt="Vega Database" />
+          <span className="text-xl font-bold">Vega Database</span>
           <button
             className="ml-auto px-2 py-1 bg-gray-200 text-gray-900 rounded shadow transition duration-150 hover:gray-100"
             onClick={() => setShowTutorial(!showTutorial)}
@@ -83,8 +75,15 @@ const App: React.FC = () => {
           <PanelContent className="relative">
             <EditorPanel
               onVisualize={(source) => {
-                setDirty(true);
                 setSpec(source);
+                setDataFlow(vega2dataDot(source));
+                setOperations(vega2operations(source));
+                setErrorBoundaryKey(errorBoundaryKey + 1);
+              }}
+              onVisualizeAll={(source) => {
+                setSpec(source);
+                setDataFlow(vega2dot(source));
+                setOperations(vega2operations(source));
                 setErrorBoundaryKey(errorBoundaryKey + 1);
               }}
             />
@@ -94,32 +93,44 @@ const App: React.FC = () => {
           <PanelHeader className="uppercase">Visualization</PanelHeader>
           <PanelContent className="flex justify-center items-center bg-gray-200 overflow-auto">
             <ErrorBoundary key={errorBoundaryKey}>
-              <VegaWrapper
-                spec={spec}
-                onNewView={(view): void => {
-                  console.log("A new view was created");
-                  if (specDirty) {
-                    setView(view);
-                    setDirty(false);
-                  }
-                }}
-              />
+              <VegaWrapper spec={spec} />
             </ErrorBoundary>
           </PanelContent>
-          <FloatingButton onClick={updateDisplay}>
-            <FontAwesomeIcon className="mr-1" icon="diagnoses" fixedWidth />
-            Analyze
-          </FloatingButton>
         </Panel>
         <Panel>
-          <PanelHeader className="uppercase">Scene Graph</PanelHeader>
+          <PanelHeader className="uppercase">Precompute</PanelHeader>
           <PanelContent padded>
-            {sceneGraph === null ? (
+            {operations === null ? (
               <EmptyStatus>
-                Click “Analyze” to extract scene graph and display here
+                Click “Visualize” to extract operations can be precomputed and
+                display here
               </EmptyStatus>
             ) : (
-              <SceneGraphInsepector sceneGraph={sceneGraph} expandLevel={2} />
+              operations.map((operation) => (
+                <div key={operation.data}>
+                  <p>==========</p>
+                  <p>Dataset name: {operation.data}</p>
+                  <p>
+                    Properties need:{" "}
+                    {operation.properties.length
+                      ? operation.properties.join(", ")
+                      : "none"}
+                  </p>
+                  <p>
+                    Operations can be precomputed:{" "}
+                    {operation.operations.length
+                      ? operation.operations.map((op, i) => (
+                          <>
+                            <br></br>
+                            <span style={{ marginLeft: "2em" }} key={i}>
+                              {op.type}: {op.params}
+                            </span>
+                          </>
+                        ))
+                      : "none"}
+                  </p>
+                </div>
+              ))
             )}
           </PanelContent>
         </Panel>

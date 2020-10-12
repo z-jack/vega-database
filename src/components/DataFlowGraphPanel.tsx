@@ -62,7 +62,7 @@ const DataFlowGraphPanel: React.FC<DataFlowGraphPanelProps> = ({ source }) => {
       <PanelContent fullscreen={isFullScreen} ref={contentRef}>
         {source === null ? (
           <EmptyStatus>
-            Click “Analyze” to extract data flow graph and display here
+            Click “Visualize” to extract data flow graph and display here
           </EmptyStatus>
         ) : showSource ? (
           <ReadonlyEditor width={width} height={height} source={source} />

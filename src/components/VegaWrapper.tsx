@@ -22,7 +22,7 @@ const VegaContainer = styled.main.attrs({ className: "" })`
  */
 export class VegaWrapper extends React.Component<VegaWrapperProps> {
   public static propTypes = {
-    onNewView: PropTypes.func.isRequired,
+    onNewView: PropTypes.func,
   };
 
   public shouldComponentUpdate(nextProps: VegaWrapperProps): boolean {

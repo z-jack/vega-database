@@ -1,6 +1,7 @@
 import { EventStream, Operator, Dataflow } from "vega-dataflow";
 import { functionContext } from "vega-functions";
 import { parse as vgParse } from "vega";
+import { extractDataGraph, analyseFieldRelations } from "./dataflow2fields";
 
 const markTypes = {
   datajoin: 1,
@@ -1136,6 +1137,16 @@ function NEList2Dot([nodes, edges]) {
    }`;
 }
 
+export function vega2dataDot(vgSpec) {
+  const runtime = vgParse(JSON.parse(vgSpec), {}, { ast: true });
+  console.log(runtime);
+  const dataflowGraph = buildGraph(runtime);
+  console.log(dataflowGraph);
+  // console.log(NEList2Dot(dataflowGraph));
+  const filteredDataflow = extractDataGraph(dataflowGraph);
+  return NEList2Dot(filteredDataflow);
+}
+
 export function vega2dot(vgSpec) {
   const runtime = vgParse(JSON.parse(vgSpec), {}, { ast: true });
   console.log(runtime);
@@ -1143,4 +1154,14 @@ export function vega2dot(vgSpec) {
   console.log(dataflowGraph);
   // console.log(NEList2Dot(dataflowGraph));
   return NEList2Dot(dataflowGraph);
+}
+
+export function vega2operations(vgSpec) {
+  const runtime = vgParse(JSON.parse(vgSpec), {}, { ast: true });
+  console.log(runtime);
+  const dataflowGraph = buildGraph(runtime);
+  console.log(dataflowGraph);
+  // console.log(NEList2Dot(dataflowGraph));
+  const filteredDataflow = extractDataGraph(dataflowGraph);
+  return analyseFieldRelations(filteredDataflow);
 }

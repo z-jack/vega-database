@@ -7,9 +7,15 @@ import { useAutoSizeMonacoEditor } from "../hooks/useMonacoEditor";
 
 const defaultSpec = JSON.stringify(defaultSpecObject, undefined, 2);
 
-export type EditorPanelProps = { onVisualize?: (spec: string) => void };
+export type EditorPanelProps = {
+  onVisualize?: (spec: string) => void;
+  onVisualizeAll?: (spec: string) => void;
+};
 
-const EditorPanel: React.FC<EditorPanelProps> = ({ onVisualize = noop }) => {
+const EditorPanel: React.FC<EditorPanelProps> = ({
+  onVisualize = noop,
+  onVisualizeAll = noop,
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useAutoSizeMonacoEditor(containerRef, {
     value: defaultSpec,
@@ -19,10 +25,17 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ onVisualize = noop }) => {
     <>
       <div ref={containerRef} className="w-full h-full overflow-hidden"></div>
       <FloatingButton
+        style={{ bottom: "4rem" }}
         onClick={() => onVisualize(editorRef.current?.getValue() ?? "")}
       >
         <FontAwesomeIcon className="mr-1" icon="play-circle" fixedWidth />
-        Visualize
+        Visualize Main
+      </FloatingButton>
+      <FloatingButton
+        onClick={() => onVisualizeAll(editorRef.current?.getValue() ?? "")}
+      >
+        <FontAwesomeIcon className="mr-1" icon="play-circle" fixedWidth />
+        Visualize All
       </FloatingButton>
     </>
   );
