@@ -901,7 +901,7 @@ function enrichNodeInformation(node, op) {
       " → " +
       normalizeDR("range");
   }
-  if (concatType.includes(op.type) && op.params) {
+  if (concatType.includes(op.type) && op.params && op.params.groupby) {
     node.tooltip =
       op.params.groupby instanceof Array
         ? op.params.groupby.map((gp) => gp.$field).join(", ") +
