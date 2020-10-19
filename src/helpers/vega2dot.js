@@ -926,7 +926,7 @@ function enrichNodeInformation(node, op) {
       op.params.fields
         .map(
           (fd, i) =>
-            fd.$field +
+            (fd ? fd.$field : "") +
             (nodeOutput instanceof Array ? " → " + nodeOutput[i] : "")
         )
         .join(", ") +
