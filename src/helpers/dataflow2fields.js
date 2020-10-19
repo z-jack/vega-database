@@ -104,7 +104,13 @@ function visitDataflow(node, nodes, edges, parentScope, scopes) {
           .split("\\n")
           .map((mapping) =>
             JSON.parse(
-              mapping.split(":")[1].split("→")[0].trim().replace(/\\/g, "")
+              mapping
+                .split(":")[1]
+                .split("→")[0]
+                .trim()
+                .replace(/\\\\/g, "###")
+                .replace(/\\/g, "")
+                .replace(/###/g, "\\")
             )
           )
       );
@@ -115,6 +121,8 @@ function visitDataflow(node, nodes, edges, parentScope, scopes) {
         value: [],
         index: [],
       };
+    } else if (node.expr) {
+      scopeWrapper.operations.push({ type: node.type, params: node.tooltip });
     } else {
       node.tooltip.split("\\n").forEach((tooltip) => {
         tooltip = tooltip.trim();

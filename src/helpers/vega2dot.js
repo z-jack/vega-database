@@ -90,6 +90,7 @@ function argop(t, s) {
 function escapeDotString(string) {
   return string
     ? string
+        .replace(/\\([^n])/g, "\\\\$1")
         .replace(/\[/g, "\\[")
         .replace(/\]/g, "\\]")
         .replace(/\{/g, "\\{")
@@ -913,6 +914,7 @@ function enrichNodeInformation(node, op) {
     node.tooltip =
       (node.tooltip ? node.tooltip + "\\n" : "") +
       escapeDotString(op.params.expr.$expr.code);
+    node.expr = true;
   }
   const nodeOutput = getNodeOutputOrDefault(op);
   if (op.params && op.params.field && op.params.field.$field) {

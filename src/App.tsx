@@ -15,6 +15,7 @@ import {
 } from "./components/common";
 import DataFlowGraphPanel from "./components/DataFlowGraphPanel";
 import TutorialPopup from "./components/TutorialPopup";
+import OperationPanel from "./components/OperationPanel";
 
 const AppHeader = styled.nav.attrs({ className: "bg-gray-900" })`
   grid-column: 1 / span 2;
@@ -44,14 +45,13 @@ const AppLayout = styled.div`
 const App: React.FC = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [operations, setOperations] = useState<
-    | {
-        data: string;
-        properties: string[];
-        operations: { type: string; params: string }[];
-      }[]
-    | null
-  >(null);
-  const [dataFlow, setDataFlow] = useState<string | null>(null);
+    {
+      data: string;
+      properties: string[];
+      operations: { type: string; params: string }[];
+    }[]
+  >([]);
+  const [dataFlow, setDataFlow] = useState<string>("");
   const [spec, setSpec] = useState(JSON.stringify(defaultSpec, undefined, 2));
   // Reference: https://sung.codes/blog/2018/09/29/resetting-error-boundary-error-state/
   const [errorBoundaryKey, setErrorBoundaryKey] = useState(0);
@@ -97,43 +97,7 @@ const App: React.FC = () => {
             </ErrorBoundary>
           </PanelContent>
         </Panel>
-        <Panel>
-          <PanelHeader className="uppercase">Precompute</PanelHeader>
-          <PanelContent padded>
-            {operations === null ? (
-              <EmptyStatus>
-                Click “Visualize” to extract operations can be precomputed and
-                display here
-              </EmptyStatus>
-            ) : (
-              operations.map((operation) => (
-                <div key={operation.data}>
-                  <p>==========</p>
-                  <p>Dataset name: {operation.data}</p>
-                  <p>
-                    Properties need:{" "}
-                    {operation.properties.length
-                      ? operation.properties.join(", ")
-                      : "none"}
-                  </p>
-                  <p>
-                    Operations can be precomputed:{" "}
-                    {operation.operations.length
-                      ? operation.operations.map((op, i) => (
-                          <>
-                            <br></br>
-                            <span style={{ marginLeft: "2em" }} key={i}>
-                              {op.type}: {op.params}
-                            </span>
-                          </>
-                        ))
-                      : "none"}
-                  </p>
-                </div>
-              ))
-            )}
-          </PanelContent>
-        </Panel>
+        <OperationPanel source={operations} />
         <DataFlowGraphPanel source={dataFlow} />
         <AppFooter />
       </AppLayout>

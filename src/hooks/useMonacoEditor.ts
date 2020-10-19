@@ -9,11 +9,16 @@ export function useMonacoEditor(
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   useEffect(() => {
     if (containerRef.current !== null) {
+      let value = options.value;
       if (editorRef.current !== null) {
+        value = editorRef.current.getValue();
         editorRef.current.dispose();
         editorRef.current = null;
       }
-      editorRef.current = monaco.editor.create(containerRef.current, options);
+      editorRef.current = monaco.editor.create(containerRef.current, {
+        ...options,
+        value,
+      });
     }
   }, [containerRef.current]);
   return editorRef;

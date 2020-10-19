@@ -60,7 +60,7 @@ const DataFlowGraphPanel: React.FC<DataFlowGraphPanelProps> = ({ source }) => {
         </PanelHeaderButton>
       </PanelHeader>
       <PanelContent fullscreen={isFullScreen} ref={contentRef}>
-        {source === null ? (
+        {!source ? (
           <EmptyStatus>
             Click “Visualize” to extract data flow graph and display here
           </EmptyStatus>
