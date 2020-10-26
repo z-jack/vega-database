@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { vega2dot, vega2dataDot, vega2operations } from "./helpers/vega2dot";
+import {
+  vega2dot,
+  vega2dataDot,
+  vega2operations,
+  view2dot,
+  view2dataDot,
+} from "./helpers/vega2dot";
 import { VegaWrapper } from "./components/VegaWrapper";
 import styled from "styled-components";
 import EditorPanel from "./components/EditorPanel";
@@ -16,6 +22,8 @@ import {
 import DataFlowGraphPanel from "./components/DataFlowGraphPanel";
 import TutorialPopup from "./components/TutorialPopup";
 import OperationPanel from "./components/OperationPanel";
+import FloatingButton from "./components/FloatingButton";
+import { View } from "vega-typings";
 
 const AppHeader = styled.nav.attrs({ className: "bg-gray-900" })`
   grid-column: 1 / span 2;
@@ -53,8 +61,15 @@ const App: React.FC = () => {
   >([]);
   const [dataFlow, setDataFlow] = useState<string>("");
   const [spec, setSpec] = useState(JSON.stringify(defaultSpec, undefined, 2));
+  const [view, setView] = useState<View | null>(null);
   // Reference: https://sung.codes/blog/2018/09/29/resetting-error-boundary-error-state/
   const [errorBoundaryKey, setErrorBoundaryKey] = useState(0);
+
+  const updateDisplay = () => {
+    if (view !== null) {
+      view2dataDot(view).then(setDataFlow);
+    }
+  };
 
   return (
     <>
@@ -93,9 +108,13 @@ const App: React.FC = () => {
           <PanelHeader className="uppercase">Visualization</PanelHeader>
           <PanelContent className="flex justify-center items-center bg-gray-200 overflow-auto">
             <ErrorBoundary key={errorBoundaryKey}>
-              <VegaWrapper spec={spec} />
+              <VegaWrapper spec={spec} onNewView={(view) => setView(view)} />
             </ErrorBoundary>
           </PanelContent>
+          <FloatingButton onClick={updateDisplay}>
+            <FontAwesomeIcon className="mr-1" icon="diagnoses" fixedWidth />
+            Performance
+          </FloatingButton>
         </Panel>
         <OperationPanel source={operations} />
         <DataFlowGraphPanel source={dataFlow} />

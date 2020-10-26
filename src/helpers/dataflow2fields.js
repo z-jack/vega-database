@@ -35,8 +35,17 @@ const Scope = require("./fieldScope");
 function markTopoNodes(node, nodes, edges) {
   node.keep = true;
   edges
-    .filter((edge) => edge.source === node.id && edge.param === "pulse")
-    .map((edge) => nodes.find((node) => node.id === edge.target))
+    .filter(
+      (edge) =>
+        (edge.source !== undefined ? edge.source : edge.nodes[0]) === node.id &&
+        edge.param === "pulse"
+    )
+    .map((edge) =>
+      nodes.find(
+        (node) =>
+          node.id === (edge.target !== undefined ? edge.target : edge.nodes[1])
+      )
+    )
     .forEach((node) => {
       if (!node.keep) {
         markTopoNodes(node, nodes, edges);
@@ -50,17 +59,30 @@ function markTopoNodes(node, nodes, edges) {
  * @returns {[Node[], Edge[]]}
  */
 function extractDataGraph([nodes, edges]) {
-  [nodes, edges] = JSON.parse(JSON.stringify([nodes, edges]));
+  try {
+    [nodes, edges] = JSON.parse(JSON.stringify([nodes, edges]));
+  } catch {
+    [nodes, edges] = [nodes.slice(), edges.slice()];
+  }
   nodes
     .filter(
-      (node) => node.data && node.value.metadata && node.value.metadata.source
+      (node) =>
+        node.data &&
+        ((node.value.metadata && node.value.metadata.source) ||
+          (node.value._argops && node.value._argval))
     )
     .forEach((node) => markTopoNodes(node, nodes, edges));
   const dataNodes = nodes.filter((node) => node.keep);
   const dataEdges = edges.filter(
     (edge) =>
-      dataNodes.find((node) => node.id === edge.source) &&
-      dataNodes.find((node) => node.id === edge.target) &&
+      dataNodes.find(
+        (node) =>
+          node.id === (edge.source !== undefined ? edge.source : edge.nodes[0])
+      ) &&
+      dataNodes.find(
+        (node) =>
+          node.id === (edge.target !== undefined ? edge.target : edge.nodes[1])
+      ) &&
       edge.param === "pulse"
   );
   return [dataNodes, dataEdges];
