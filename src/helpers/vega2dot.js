@@ -1252,10 +1252,17 @@ export async function view2dataDot(view, stamp) {
             v.prototype.run = function () {
               console.log("pulse", this);
               const ref = nodes.find((node) => node.value === this);
+              const startTime = (window.performance || Date).now();
+              const result = _run[k].apply(this, arguments);
+              const deltaTime = (window.performance || Date).now() - startTime;
               if (ref) {
-                ref.tooltip = Date.now() - timer + " ms";
+                let sumTime = deltaTime;
+                if (ref.tooltip.endsWith("ms")) {
+                  sumTime += parseFloat(ref.tooltip);
+                }
+                ref.tooltip = sumTime.toFixed(3) + " ms";
               }
-              return _run[k].apply(this, arguments);
+              return result;
             };
           }
         });

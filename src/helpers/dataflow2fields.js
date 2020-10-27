@@ -59,10 +59,13 @@ function markTopoNodes(node, nodes, edges) {
  * @returns {[Node[], Edge[]]}
  */
 function extractDataGraph([nodes, edges]) {
+  let onlyOne = false;
+  let alreadyOne = false;
   try {
     [nodes, edges] = JSON.parse(JSON.stringify([nodes, edges]));
   } catch {
     [nodes, edges] = [nodes.slice(), edges.slice()];
+    onlyOne = true;
   }
   nodes
     .filter(
@@ -71,6 +74,16 @@ function extractDataGraph([nodes, edges]) {
         ((node.value.metadata && node.value.metadata.source) ||
           (node.value._argops && node.value._argval))
     )
+    .filter(() => {
+      if (onlyOne) {
+        if (!alreadyOne) {
+          alreadyOne = true;
+          return true;
+        }
+        return false;
+      }
+      return true;
+    })
     .forEach((node) => markTopoNodes(node, nodes, edges));
   const dataNodes = nodes.filter((node) => node.keep);
   const dataEdges = edges.filter(
